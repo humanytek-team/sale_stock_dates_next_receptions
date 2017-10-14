@@ -48,6 +48,7 @@ class SaleOrderLine(models.Model):
 
         return date_result
 
+
     @api.onchange('product_uom_qty', 'product_uom', 'route_id')
     def _onchange_product_id_check_availability(self):
 
@@ -99,8 +100,19 @@ class SaleOrderLine(models.Model):
 
                         return {'warning': warning_mess}
 
-        onchange_response = super(
-            SaleOrderLine, self)._onchange_product_id_check_availability()
+                else:
 
-        if onchange_response:
-            return onchange_response
+                    warning_mess = {
+                        'title': _('Not enough inventory!'),
+                        'message' : _('You plan to sell %.2f %s but the stock on hand is %.2f %s.') % \
+                            (
+                                self.product_uom_qty,
+                                self.product_uom.name,
+                                self.product_id.qty_available,
+                                self.product_id.uom_id.name
+                            )}
+
+                    return {'warning': warning_mess}
+
+        return super(
+            SaleOrderLine, self)._onchange_product_id_check_availability()
